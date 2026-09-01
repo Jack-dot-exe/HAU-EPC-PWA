@@ -1,0 +1,16 @@
+@import "tailwindcss";
+ @plugin "daisyui" {
+   themes: cupcake --default/*,  business --prefersdark */;
+ }
+
+/* Hide number input spinners globally (Chrome, Edge, Safari) */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Hide number input spinners globally (Firefox) */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
