@@ -14,6 +14,7 @@ import { formatCheckValue, formatMetricValue, getFieldUnitId, getUnitLabel } fro
 import { getResultMetricLabels } from "../domain/resultLabels";
 import { createSavedCheckPdfBlob, downloadSavedCheckPdf } from "../lib/epcPdf";
 import { getFieldDefByKey, getInputOnlyMetricValue, getProfileFields, getRecordFieldSchema, isInputOnlyRecord } from "../domain/profileUtils";
+import { formatDateOnly } from "../domain/dates";
 
 type CheckTypeFilter = "All" | CheckType;
 
@@ -40,14 +41,14 @@ function toISODateOnly(d: Date) {
   return `${year}-${month}-${day}`;
 }
 
-function withinDateRange(iso: string, from?: string, to?: string) {
-  const t = new Date(iso).getTime();
+function withinDateRange(dateIso: string, from?: string, to?: string) {
+  const t = dateIso;
   if (from) {
-    const f = new Date(from + "T00:00:00").getTime();
+    const f = from;
     if (t < f) return false;
   }
   if (to) {
-    const tt = new Date(to + "T23:59:59").getTime();
+    const tt = to;
     if (t > tt) return false;
   }
   return true;
@@ -400,13 +401,13 @@ export default function HistoryPage() {
     return checks
       .filter((c) => c.registrationId === registrationId)
       .slice()
-      .sort((a, b) => b.createdAtIso.localeCompare(a.createdAtIso));
+      .sort((a, b) => b.checkDate.localeCompare(a.checkDate) || b.createdAtIso.localeCompare(a.createdAtIso));
   }, [checks, registrationId]);
 
   const filtered = useMemo(() => {
     return allForRegSortedDesc.filter((c) => {
       if (checkTypeFilter !== "All" && c.checkType !== checkTypeFilter) return false;
-      if (!withinDateRange(c.createdAtIso, fromDate || undefined, toDate || undefined)) return false;
+      if (!withinDateRange(c.checkDate, fromDate || undefined, toDate || undefined)) return false;
       return true;
     });
   }, [allForRegSortedDesc, checkTypeFilter, fromDate, toDate]);
@@ -596,7 +597,7 @@ export default function HistoryPage() {
               <div className="flex items-center justify-between">
                 <span>Last check date</span>
                 <span className="font-mono">
-                  {preparedRows[0] ? new Date(preparedRows[0].record.createdAtIso).toLocaleDateString() : "-"}
+                  {preparedRows[0] ? formatDateOnly(preparedRows[0].record.checkDate) : "-"}
                 </span>
               </div>
             </div>
@@ -630,7 +631,7 @@ export default function HistoryPage() {
                   <tbody>
                     {preparedRows.map(({ record, engines }) => (
                       <tr key={record.id}>
-                        <td className="w-8">{new Date(record.createdAtIso).toLocaleString()}</td>
+                        <td className="w-8">{formatDateOnly(record.checkDate)}</td>
                         <td>{record.checkType}</td>
                         <td className="text-center font-mono">{formatTotalTime(record)}</td>
                         <td>
@@ -708,7 +709,7 @@ export default function HistoryPage() {
                 <div className="mt-3 space-y-3 text-sm">
                   <div className="grid grid-cols-2 gap-2">
                     <div className="opacity-70">Date</div>
-                    <div className="font-mono">{new Date(selected.createdAtIso).toLocaleString()}</div>
+                    <div className="font-mono">{formatDateOnly(selected.checkDate)}</div>
 
                     <div className="opacity-70">Type</div>
                     <div className="font-mono">{selected.checkType}</div>

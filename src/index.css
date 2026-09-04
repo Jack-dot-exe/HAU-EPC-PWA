@@ -1,7 +1,12 @@
 @import "tailwindcss";
  @plugin "daisyui" {
-   themes: cupcake --default/*,  business --prefersdark */;
+   themes: silk --default, dim --prefersdark;
  }
+
+:root {
+  --theme-light: nord;
+  --theme-dark: dim;
+}
 
 /* Hide number input spinners globally (Chrome, Edge, Safari) */
 input[type="number"]::-webkit-outer-spin-button,

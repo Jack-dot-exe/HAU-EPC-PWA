@@ -17,6 +17,7 @@ import type {
 import { getDisplayMetrics } from "../domain/resultMetrics";
 import { formatFieldValue, formatMetricValue, getFieldUnitId, getUnitLabel } from "../domain/units";
 import { ENV_FIELD_KEYS, getExecutionMode, getProfileFields, isInputOnlyRecord } from "../domain/profileUtils";
+import { formatDateOnly } from "../domain/dates";
 
 type EpcPdfPayload = {
   registration: Registration;
@@ -121,7 +122,7 @@ export function createEpcPdfPayloadFromRecord(
     engineValues: engineRows.map((engine) => engine.values ?? {}),
     computedResults,
     exportedAt: new Date(),
-    checkPerformedAt: new Date(record.createdAtIso),
+    checkPerformedAt: new Date(`${record.checkDate}T12:00:00`),
     calculationVersion:
       record.calculationVersion ??
       (executionMode === "calculated" ? CALC_VERSIONS[profile.calculationId] : undefined),
@@ -230,7 +231,7 @@ export async function buildEpcPdfDocument(payload: EpcPdfPayload): Promise<jsPDF
   bodyLine("Registration", payload.registration.tailNumber);
   bodyLine("Aircraft", `${payload.profile.modelName} (${payload.profile.engine})`);
   bodyLine("EPC Type", payload.checkType);
-  bodyLine("EPC Perf.", payload.checkPerformedAt.toLocaleString());
+  bodyLine("EPC Perf.", formatDateOnly(payload.checkPerformedAt.toISOString().slice(0, 10)));
   bodyLine("Profile Mode", payload.executionMode === "input_only" ? "Input Only" : "Calculated");
   cursorY += 3;
 

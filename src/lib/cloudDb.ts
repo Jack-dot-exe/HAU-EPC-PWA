@@ -41,7 +41,8 @@ type RegistrationRow = {
 
 type PowerCheckRow = {
   id: string;
-  created_at_iso: string;
+  created_at: string;
+  check_date: string;
   registration_id: string;
   check_type: PowerCheckRecord["checkType"];
   total_time_hrs: number | null;
@@ -149,7 +150,8 @@ function toRegistrationRow(registration: Registration): RegistrationRow {
 function toCheckRow(check: PowerCheckRecord): PowerCheckRow {
   return {
     id: check.id,
-    created_at_iso: check.createdAtIso,
+    created_at: check.createdAtIso,
+    check_date: check.checkDate,
     registration_id: check.registrationId,
     check_type: check.checkType,
     total_time_hrs: check.totalTimeHrs ?? null,
@@ -168,7 +170,8 @@ function toCheckRow(check: PowerCheckRecord): PowerCheckRow {
 function toCheck(check: PowerCheckRow, engines: PowerCheckEngineRow[]): PowerCheckRecord {
   return {
     id: check.id,
-    createdAtIso: check.created_at_iso,
+    createdAtIso: check.created_at,
+    checkDate: check.check_date,
     registrationId: check.registration_id,
     checkType: check.check_type,
     totalTimeHrs: check.total_time_hrs ?? undefined,
@@ -321,8 +324,9 @@ export async function fetchChecksCloud(): Promise<PowerCheckRecord[] | null> {
   const [checksRes, enginesRes] = await Promise.all([
     db
       .from("epc_power_checks")
-      .select("id,created_at_iso,registration_id,check_type,total_time_hrs,calculation_version,profile_execution_mode,created_by_user_id,created_by_user_email,schema_version,profile_snapshot,check_values,check_result,overall_result")
-      .order("created_at_iso", { ascending: false }),
+      .select("id,created_at,check_date,registration_id,check_type,total_time_hrs,calculation_version,profile_execution_mode,created_by_user_id,created_by_user_email,schema_version,profile_snapshot,check_values,check_result,overall_result")
+      .order("check_date", { ascending: false })
+      .order("created_at", { ascending: false }),
     db
       .from("epc_power_check_engines")
       .select("check_id,engine_id,engine_label,engine_values,engine_result,position"),

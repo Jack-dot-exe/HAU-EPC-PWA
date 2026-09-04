@@ -1,37 +1,63 @@
 import { useEffect, useState } from "react";
 
+function getThemeNames() {
+  const styles = getComputedStyle(document.documentElement);
+
+  return {
+    light: styles.getPropertyValue("--theme-light").trim(),
+    dark: styles.getPropertyValue("--theme-dark").trim(),
+  };
+}
+
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const themes = getThemeNames();
 
-  useEffect(() => {
-    const saved = localStorage.getItem("theme") as "light" | "dark" | null;
+  const [theme, setTheme] = useState(() => {
+    const savedTheme = localStorage.getItem("theme");
 
-    if (saved) {
-      setTheme(saved);
-      document.documentElement.setAttribute("data-theme", saved);
-    } else {
-      const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const initial = systemDark ? "dark" : "light";
-      setTheme(initial);
-      document.documentElement.setAttribute("data-theme", initial);
+    if (savedTheme === themes.light || savedTheme === themes.dark) {
+      document.documentElement.setAttribute("data-theme", savedTheme);
+      return savedTheme;
     }
-  }, []);
+
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
+
+    const initialTheme = prefersDark ? themes.dark : themes.light;
+
+    document.documentElement.setAttribute(
+      "data-theme",
+      initialTheme
+    );
+
+    return initialTheme;
+  });
 
   const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
+    const newTheme =
+      theme === themes.light ? themes.dark : themes.light;
 
     setTheme(newTheme);
-    document.documentElement.setAttribute("data-theme", newTheme);
+
+    document.documentElement.setAttribute(
+      "data-theme",
+      newTheme
+    );
+
     localStorage.setItem("theme", newTheme);
   };
+
+  const isDark = theme === themes.dark;
 
   return (
     <button
       className="btn btn-ghost btn-circle"
       onClick={toggleTheme}
-      title="Toggle theme"
+      type="button"
+      title={isDark ? "Switch to light mode" : "Switch to dark mode"}
     >
-      {theme === "light" ? (
+      {theme === "dark" ? (
         // Moon icon
         <svg xmlns="http://www.w3.org/2000/svg" className="size-5"
           viewBox="0 0 24 24" fill="currentColor">

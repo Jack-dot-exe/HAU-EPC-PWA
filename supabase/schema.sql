@@ -41,7 +41,7 @@ create table if not exists public.epc_registrations (
 
 create table if not exists public.epc_power_checks (
   id text primary key,
-  created_at_iso text not null,
+  check_date date not null,
   registration_id text not null references public.epc_registrations(id) on delete cascade,
   check_type text not null,
   total_time_hrs double precision,
@@ -71,7 +71,7 @@ create table if not exists public.epc_power_check_engines (
 );
 
 create index if not exists idx_epc_checks_registration on public.epc_power_checks(registration_id);
-create index if not exists idx_epc_checks_created_iso on public.epc_power_checks(created_at_iso);
+create index if not exists idx_epc_checks_check_date on public.epc_power_checks(check_date);
 create index if not exists idx_epc_registrations_profile on public.epc_registrations(profile_id);
 
 create or replace function public.set_updated_at()

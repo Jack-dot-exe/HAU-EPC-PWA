@@ -146,6 +146,7 @@ export interface PowerCheckProfileSnapshot {
 export interface PowerCheckRecord {
   id: string;
   createdAtIso: string;
+  checkDate: string;
   registrationId: string;
   checkType: CheckType;
   totalTimeHrs?: number;

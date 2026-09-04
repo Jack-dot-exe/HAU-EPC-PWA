@@ -47,6 +47,7 @@ function isRecordLike(x: any): x is PowerCheckRecord {
     typeof x === "object" &&
     typeof x.id === "string" &&
     typeof x.createdAtIso === "string" &&
+    typeof x.checkDate === "string" &&
     typeof x.registrationId === "string" &&
     typeof x.checkType === "string"
   );

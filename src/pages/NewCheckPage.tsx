@@ -22,6 +22,7 @@ import { decimalToHHMM } from "../calculations/utils/time";
 import { CALC_VERSIONS, computeForProfile, prepareCheckFromProfile } from "../calculations";
 import { createEpcResultPdfBlob, downloadEpcResultPdf } from "../lib/epcPdf";
 import { buildProfileSnapshot, ENV_FIELD_KEYS, getExecutionMode, getProfileFields, parseOverallResultValue } from "../domain/profileUtils";
+import { getLocalDateIso } from "../domain/dates";
 
 function makeId(prefix: string) {
   // @ts-ignore
@@ -110,6 +111,7 @@ export default function NewCheckPage() {
   const { currentUser } = useUsers();
 
   const [registrationId, setRegistrationId] = useState(registrations[0]?.id ?? "");
+  const [checkDate, setCheckDate] = useState(() => getLocalDateIso());
 
   useEffect(() => {
     if (registrations.length === 0) {
@@ -254,7 +256,7 @@ export default function NewCheckPage() {
           engineValues,
           computedResults,
           exportedAt: new Date(),
-          checkPerformedAt: new Date(),
+          checkPerformedAt: new Date(`${checkDate}T12:00:00`),
           calculationVersion: CALC_VERSIONS[profile.calculationId],
           executionMode,
         }
@@ -301,6 +303,7 @@ export default function NewCheckPage() {
     const record: PowerCheckRecord = {
       id: makeId("c"),
       createdAtIso: new Date().toISOString(),
+      checkDate,
       registrationId,
       checkType,
       schemaVersion: 2,
@@ -316,6 +319,7 @@ export default function NewCheckPage() {
 
     await addCheck(record);
     setEnvValues({ OAT: 15, PA: 5000, TTH: undefined });
+    setCheckDate(getLocalDateIso());
     setEngineValues(Array.from({ length: engineCount }, () => ({} as PowerCheckValues)));
     setActiveEngineIdx(0);
     setComputedResults(null);
@@ -375,7 +379,7 @@ export default function NewCheckPage() {
               </div>
             ) : (
               <>
-                <div className="grid gap-3 md:grid-cols-2">
+                <div className="grid gap-3 md:grid-cols-3">
                   <RegistrationPicker
                     registrations={registrations}
                     value={registrationId}
@@ -386,7 +390,19 @@ export default function NewCheckPage() {
                   />
 
                   <div className="flex flex-col">
-                    <label className="label-text label">Check Type</label>
+                    <label className="label-text label" htmlFor="check-date">Power Check Date</label>
+                    <input
+                      id="check-date"
+                      type="date"
+                      className="input input-bordered w-full"
+                      value={checkDate}
+                      onChange={(e) => setCheckDate(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <label className="label-text label">Power Check Type</label>
                     <select
                       className="select select-bordered w-full"
                       value={checkType}
@@ -403,7 +419,7 @@ export default function NewCheckPage() {
                       ))}
                     </select>
                   </div>
-                  <span className="text-xs opacity-75">
+                  <span className="flex items center gap-2 md:col-span-3 md:whitespace-nowrap text-xs opacity-75">
                     Profile: {profile ? `${profile.modelName} (${profile.engine})` : "-"}
                     {profile && (
                       <span className="ml-2 badge badge-outline badge-sm">
@@ -519,7 +535,7 @@ export default function NewCheckPage() {
                 <div className="alert alert-info">
                   <span>This profile does not run a calculation. Saved records will use the configured history and trend fields.</span>
                 </div>
-                {profile?.inputOnlyConfig?.primaryTrendFieldKey && (
+                {/*profile?.inputOnlyConfig?.primaryTrendFieldKey && (
                   <div className="text-sm opacity-80">
                     Trend field: <span className="font-semibold">{profile.inputOnlyConfig.primaryTrendFieldKey}</span>
                   </div>
@@ -531,7 +547,7 @@ export default function NewCheckPage() {
                       <span> (threshold {profile.inputOnlyConfig.alarmDropThreshold})</span>
                     )}
                   </div>
-                )}
+                )*/} 
                 {profile?.powerCheckDescription?.trim() && (
                   <div className="mt-3 rounded-box border border-base-300 bg-base-200/40 px-4 py-3">
                     <div className="text-sm font-semibold">Procedure</div>
