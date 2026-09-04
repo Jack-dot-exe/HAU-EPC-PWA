@@ -12,6 +12,8 @@ dist
 dist-ssr
 *.local
 .env
+.example
+.pw
 
 # Editor directories and files
 .vscode/*
@@ -23,4 +25,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
 HAU-EPC-pwa*.zip
