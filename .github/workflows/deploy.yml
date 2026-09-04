@@ -1,4 +1,4 @@
-name: Deploy EPC Tool to GitHub Pages
+name: Deploy EPC Tool to GitHub Pages / Custom Action
 
 on:
   push:
